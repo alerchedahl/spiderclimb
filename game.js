@@ -90,10 +90,19 @@ function update() {
     // handle layer/anchor interaction as long as the webline is present
     if (webLine) {
         var dist = Phaser.Point.distance(player, webLine.anchor, false);
-        var delta = dist - webLine.radius;
-        var k = 10;
-        var acc = Phaser.Point.normalize(Phaser.Point.subtract(webLine.anchor, player)).setMagnitude(delta * k);
-        player.body.acceleration = acc;
+        var playerRadius = 30;
+        var delta = dist - (webLine.radius - playerRadius);
+        // console.log("delta: ", delta);
+        // only pull not push
+        if (delta > 0) {
+            var dir = Phaser.Point.subtract(webLine.anchor, player);
+            // console.log("dir: ", dir);
+            // mass * spring constant
+            var k = 1;
+            var acc = Phaser.Point.normalize(dir).setMagnitude(delta * k);
+            // console.log("acc: ", acc);
+            player.body.velocity = Phaser.Point.add(player.body.velocity, acc);
+        }
     }
 
     // let arrow follow player
@@ -112,7 +121,9 @@ function update() {
     }
 
     // reset the players velocity (movement)
-    player.body.velocity.x = 0;
+    if (player.body.touching.down && playerHitPlatform) {
+        player.body.velocity.x = 0;
+    }
 
     // keyboard movement
     if (cursors.left.isDown) {
@@ -142,7 +153,7 @@ function update() {
             webLine.radius -= 10;
         } else if (player.body.touching.down && playerHitPlatform) {
             // jump if touching the ground
-            player.body.velocity.y = -150;
+            player.body.velocity.y += -150;
         }
     }
 
