@@ -18,6 +18,8 @@ var web;
 var webLine;
 var line;
 var gfx;
+        
+var playerRadius = 10;
 
 function create() {
 
@@ -63,7 +65,7 @@ function create() {
 
     // graphics used to render line between player and anchor
     gfx = game.add.graphics(0, 0);
-    gfx.lineStyle(1, '#000', 1);
+    gfx.lineStyle(1, '#888', 1);
 }
 
 function update() {
@@ -81,7 +83,7 @@ function update() {
                 x: web.x,
                 y: web.y
             },
-            radius: Phaser.Point.distance(player, web, false)
+            radius: Phaser.Point.distance(player, web, false) - playerRadius
         };
         // remove the projectile - the 'chain' remains
         web.kill();
@@ -89,19 +91,29 @@ function update() {
 
     // handle layer/anchor interaction as long as the webline is present
     if (webLine) {
-        var dist = Phaser.Point.distance(player, webLine.anchor, false);
-        var playerRadius = 30;
-        var delta = dist - (webLine.radius - playerRadius);
+        // current speed
+        var speed = player.body.velocity.getMagnitude();
+        // where we will be next
+        var pos = Phaser.Point.add(player.body.position, player.body.velocity)
+        var dist = Phaser.Point.distance(pos, webLine.anchor, false);
+        var delta = dist - (webLine.radius);
         // console.log("delta: ", delta);
+        if (delta = 0) {
+            var pullDir = Phaser.Point.subtract(webLine.anchor, player.body.position);
+            var dir = 0;
+        }
         // only pull not push
         if (delta > 0) {
-            var dir = Phaser.Point.subtract(webLine.anchor, player);
+            var pullDir = Phaser.Point.subtract(webLine.anchor, pos);
             // console.log("dir: ", dir);
             // mass * spring constant
             var k = 1;
-            var acc = Phaser.Point.normalize(dir).setMagnitude(delta * k);
+            var acc = Phaser.Point.normalize(pullDir).setMagnitude(delta * k);
+
+            var dir = Phaser.Point.add(player.body.velocity, acc);
+            var drag = 1;
             // console.log("acc: ", acc);
-            player.body.velocity = Phaser.Point.add(player.body.velocity, acc);
+            player.body.velocity = Phaser.Point.normalize(dir).setMagnitude(speed * drag);
         }
     }
 
@@ -147,10 +159,14 @@ function update() {
         }
     }
     if (cursors.up.isDown) {
-        if (cursors.right.shiftKey===true && webLine)
+        if (cursors.up.shiftKey===true && webLine)
         {
+            var delta = 10;
             // climb
-            webLine.radius -= 10;
+            webLine.radius -= delta;
+            var dir = Phaser.Point.subtract(webLine.anchor, player.body);
+            var t = Phaser.Point.normalize(dir).setMagnitude(delta);
+            player.body.position = Phaser.Point.add(player.body.position, t);
         } else if (player.body.touching.down && playerHitPlatform) {
             // jump if touching the ground
             player.body.velocity.y += -150;
@@ -166,6 +182,7 @@ function update() {
         // }
 
         // draw the line!
+        gfx.lineStyle(1, '#888', 1);
         gfx.moveTo(webLine.anchor.x, webLine.anchor.y);
         line = gfx.lineTo(player.x, player.y);
     } else if (line) {
@@ -177,6 +194,8 @@ function update() {
 function render() {
     // debug info
     //game.debug.spriteInfo(arrow, 32, 32);
+    //game.debug.bodyInfo(player.body, 10, 10, `#0F0`);
+
 }
 
 function fire() {
