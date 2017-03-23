@@ -44,6 +44,8 @@ Main.prototype = {
    		me.arrow.x = me.player.x;
     	me.arrow.y = me.player.y;
 
+		me.standing = me.player.body.touching && me.player.body.touching.down;
+
 		if (me.spaceKey.justUp) {
 			me.fire();
 		}
@@ -57,7 +59,7 @@ Main.prototype = {
 			{
 				// aim
 				me.arrow.rotation -= 0.05;
-			} else if (me.player.body.touching.down) {
+			} else if (me.standing) {
 				// move
 				me.player.body.velocity.x = -50;
 			}
@@ -67,7 +69,7 @@ Main.prototype = {
 			{
 				// aim
 				me.arrow.rotation += 0.05;
-			} else if (me.player.body.touching.down) {
+			} else if (me.standing) {
 				// move
 				me.player.body.velocity.x = 50;
 			}
@@ -122,6 +124,8 @@ Main.prototype = {
 		var len = Phaser.Point.distance(me.player, pointer, false);
 		var pull = 1
 	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, len*pull, 100, 3, [-pointer.x, -pointer.y]);
+		console.log('Changed to rope with length', len);
+		console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = pointer.x;
 	    me.ropeAnchorY = pointer.y
 	},
@@ -130,14 +134,18 @@ Main.prototype = {
 	    console.log('pull');
 		var me = this;
 
+	    //Create new spring with shorter rest length
+		//var len = me.rope.data.restLength;
+		var len = Phaser.Point.distance(me.player, { x: me.ropeAnchorX, y: me.ropeAnchorY }, false);
+		console.log('Rope had length', len);
+		var step = 30;
+		var newLen = Math.max(len-step, 3);
+		console.log('Pulled to rope with length', newLen);
+		console.log('Rope now has length', me.rope.data.restLength);
+
 	    //Remove last spring
 	    me.game.physics.p2.removeSpring(me.rope);
 
-	    //Create new spring with shorter rest length
-		var len = me.rope.data.restLength;
-		var step = 0.3;
-		var newLen = Math.max(len-step, 3);
-		console.log('Rope now has length', newLen);
 	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, newLen, 100, 3, [-me.ropeAnchorX, -me.ropeAnchorY]);
 	},
 
@@ -157,7 +165,7 @@ Main.prototype = {
 		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
 		me.web.body.velocity.x = magnitude * Math.cos(firingAngle) + me.player.body.velocity.x;
 		me.web.body.velocity.y = magnitude * Math.sin(firingAngle) + me.player.body.velocity.y;
-		if (!player.body.touching.down) {
+		if (!me.standing) {
 			me.player.body.velocity.x -= 0.1 * magnitude * Math.cos(firingAngle);
 			me.player.body.velocity.y -= 0.1 * magnitude * Math.sin(firingAngle);
 		}
