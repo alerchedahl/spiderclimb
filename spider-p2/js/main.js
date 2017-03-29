@@ -9,11 +9,21 @@ Main.prototype = {
 
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
+		// background
+		me.game.add.sprite(0, -300, 'bg');
 
 	    // Start the P2 Physics Engine
 	    me.game.physics.startSystem(Phaser.Physics.P2JS);
 
-	    // Set the gravity
+	    // Create collision groups
+	    me.playerCollisionGroup = me.game.physics.p2.createCollisionGroup();
+	    me.webCollisionGroup = me.game.physics.p2.createCollisionGroup();
+	    me.blockCollisionGroup = me.game.physics.p2.createCollisionGroup();
+
+
+		game.physics.p2.setImpactEvents(true);
+	    
+		// Set the gravity
 	    me.game.physics.p2.gravity.y = 1000;
 
 	    // Create a random generator
@@ -22,6 +32,8 @@ Main.prototype = {
 
 		// Register keys
 		me.registerKeys();
+
+		me.createPlatforms();
 
 	    // Create the ceiling
 	    me.createBlock();
@@ -77,6 +89,8 @@ Main.prototype = {
 
 	    //Update the position of the rope
 	    me.drawRope();
+
+//		me.platform[0].key.render();
 	},
 
 	registerKeys: function() {
@@ -90,6 +104,64 @@ Main.prototype = {
 		//me.cursors.up.onInputDown(me.pullRope);
 	},
 
+	createPlatforms: function () {
+	    var me = this;
+
+		function createPlatform(data, index) {
+			// // Define a block using bitmap data rather than an image sprite
+			var blockShape = me.game.add.bitmapData(data.width, data.height);
+
+			// Fill the block with black color
+			blockShape.ctx.rect(0, 0, data.width, data.height);
+			blockShape.ctx.fillStyle = '2a2';
+			blockShape.ctx.fill();
+			
+			// // Create a new sprite using the bitmap data
+			me.platform[index] = me.game.add.sprite(data.x, data.y, blockShape);
+// 			me.platform[index] = me.game.add.sprite(data.x, data.y, 'ground');
+
+			// // Enable P2 Physics and set the block not to move
+			me.game.physics.p2.enable([me.platform[index]], true);
+			me.platform[index].body.static = true;
+			me.platform[index].anchor.setTo(data.x, data.y);
+			me.platform[index].body.setCollisionGroup(me.blockCollisionGroup);
+			me.platform[index].body.collides([
+				me.webCollisionGroup,
+			]);
+			// me.platform[index].inputEnabled = true;
+			// me.platform[index].events.onInputDown.add(me.changeRope, this);
+
+
+			//me.platform[index] = me.platforms.create(data.x, data.y, 'ground');
+			//me.platform[index].body.immovable = true;			
+		}
+
+		var platforData = [
+			{ x: 0, y: me.game.world.height - 64, width: me.game.world.width, height: 64 },
+			{ x: 400, y: 400, width: 200, height: 32 },
+			{ x: 0, y: 200, width: 200, height: 32 }
+		]
+
+		me.platforms = game.add.group();
+		me.platforms.enableBody = true; // enable physics for any object that is created in this group
+		me.platform = [];
+		platforData.forEach(createPlatform);
+
+
+		////////
+		    // the platforms group contains the ground and the ledges we can jump on
+		//platforms = me.game.add.group();
+		//platforms.enableBody = true; // enable physics for any object that is created in this group
+	// 	var ground = me.platforms.create(0, game.world.height - 64, 'ground');
+	// 	ground.scale.setTo(2, 2);
+	// 	ground.body.immovable = true; // stop it from falling away when you jump on it
+	// 	// create two ledges
+	// 	var ledge = me.platforms.create(400, 400, 'ground');
+	// 	ledge.body.immovable = true;
+	// 	ledge = me.platforms.create(-150, 250, 'ground');
+	// 	ledge.body.immovable = true;
+	},
+
 	createBlock: function() {
 	    var me = this;
 
@@ -98,7 +170,7 @@ Main.prototype = {
 
 	    // Fill the block with black color
 	    blockShape.ctx.rect(0, 0, me.game.world.width, 200);
-	    blockShape.ctx.fillStyle = '000';
+	    blockShape.ctx.fillStyle = 'abc';
 	    blockShape.ctx.fill();
 
 	    // Create a new sprite using the bitmap data
@@ -112,6 +184,22 @@ Main.prototype = {
 	    // Enable clicking on block and trigger a function when it is clicked
     	me.block.inputEnabled = true;
 	    me.block.events.onInputDown.add(me.changeRope, this);
+	},
+
+	newRope: function(body, point) {
+	    var me = this;
+
+	    //Remove last spring
+	    me.game.physics.p2.removeSpring(me.rope);
+
+	    //Create new spring at pointer x and y
+		var len = Phaser.Point.distance(me.player, point, false);
+		var pull = 1
+	    me.rope = me.game.physics.p2.createSpring(body, me.player, len*pull, 100, 3, [-point.x, -point.y]);
+		console.log('New rope with length', len);
+		console.log('Rope now has length', me.rope.data.restLength);
+	    me.ropeAnchorX = point.x;
+	    me.ropeAnchorY = point.y
 	},
 
 	changeRope: function(sprite, pointer) {
@@ -157,9 +245,14 @@ Main.prototype = {
 		// instantiate web
 		me.web = game.add.sprite(me.player.x, me.player.y, 'projectile');
 		me.web.anchor.set(0.5, 0.5);
-		me.game.physics.arcade.enable(me.web);
+		me.game.physics.p2.enable([me.web], true);
 		me.web.body.gravity.y = 300;
-		me.web.body.collideWorldBounds = true;
+	    me.web.body.setCollisionGroup(me.webCollisionGroup);
+	    me.web.body.collides([
+	        me.blockCollisionGroup,
+	    ]);
+		// collide the web projectile and the platforms
+		me.web.body.createGroupCallback(me.blockCollisionGroup,me.webHit, me);
 
 		var magnitude = 500;
 		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
@@ -169,6 +262,15 @@ Main.prototype = {
 			me.player.body.velocity.x -= 0.1 * magnitude * Math.cos(firingAngle);
 			me.player.body.velocity.y -= 0.1 * magnitude * Math.sin(firingAngle);
 		}
+	},
+
+	webHit: function(web, block, webShape, blockShape) {
+	    var me = this;
+
+		console.log('web hit', web.x, web.y);
+		me.newRope(block, me.web);
+		// remove the projectile - the rope remains
+		me.web.safeDestroy = true;
 	},
 
 	createPlayer: function() {
@@ -181,10 +283,15 @@ Main.prototype = {
 	    me.game.physics.p2.enable([me.player], false);
 
 	    // Get rid of current bounding box
-	    me.player.body.clearShapes();
+	    //me.player.body.clearShapes();
 
 	    // Add our PhysicsEditor bounding shape
-	    me.player.body.loadPolygon("sprite_physics", "betty");
+	    //me.player.body.loadPolygon("sprite_physics", "betty");
+	    // Define the players collision group and make it collide with the block and fruits
+	    me.player.body.setCollisionGroup(me.playerCollisionGroup);
+	    me.player.body.collides([
+	        me.blockCollisionGroup,
+	    ]);
 	},
 
 	createRope: function() {
