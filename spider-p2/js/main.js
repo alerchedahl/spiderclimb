@@ -57,9 +57,30 @@ Main.prototype = {
     	me.arrow.y = me.player.y;
 
 		me.standing = me.player.body.touching && me.player.body.touching.down;
+		me.extraWeb = false;
+
+		// function checkIfCanJump() {
+		// 	var yAxis = p2.vec2.fromValues(0, 1);
+		// 	var result = false;
+		// 	for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {
+		// 		var c = game.physics.p2.world.narrowphase.contactEquations[i];
+		// 		if (c.bodyA === player.body.data || c.bodyB === player.body.data) {
+		// 			var d = p2.vec2.dot(c.normalA, yAxis); // Normal dot Y-axis
+		// 			if (c.bodyA === player.body.data) d *= -1;
+		//             if (d > 0.5) result = true;
+		//         }
+		//     }
+	    //     return result;
+		// }
+
 
 		if (me.spaceKey.justUp) {
-			me.fire();
+			if (!me.player.swinging || me.extraWeb) {
+				me.fire();
+			}
+			else {
+				me.cutRope();
+			}
 		}
 
 		if (me.cursors.up.justUp) {
@@ -88,8 +109,9 @@ Main.prototype = {
 		}
 
 	    //Update the position of the rope
-	    me.drawRope();
-
+		if (me.player.swinging) {
+		    me.drawRope();
+		}
 //		me.platform[0].key.render();
 	},
 
@@ -181,6 +203,7 @@ Main.prototype = {
 		var len = Phaser.Point.distance(me.player, point, false);
 		var pull = 1
 	    me.rope = me.game.physics.p2.createSpring(body, me.player, len*pull, 100, 3, [-point.x, -point.y]);
+		me.player.swinging = true;
 		console.log('New rope with length', len);
 		console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = point.x;
@@ -197,6 +220,7 @@ Main.prototype = {
 		var len = Phaser.Point.distance(me.player, pointer, false);
 		var pull = 1
 	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, len*pull, 100, 3, [-pointer.x, -pointer.y]);
+		me.player.swinging = true;
 		console.log('Changed to rope with length', len);
 		console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = pointer.x;
@@ -222,6 +246,14 @@ Main.prototype = {
 	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, newLen, 100, 3, [-me.ropeAnchorX, -me.ropeAnchorY]);
 	},
 
+	cutRope: function() {
+		var me = this;
+
+	    //Remove last spring
+	    me.game.physics.p2.removeSpring(me.rope);
+		me.player.swinging = false;
+	},
+
 	fire: function() {
 		console.log('Fire!');
 		var me = this;
@@ -237,7 +269,7 @@ Main.prototype = {
 	        me.blockCollisionGroup,
 	    ]);
 		// collide the web projectile and the platforms
-		me.web.body.createGroupCallback(me.blockCollisionGroup,me.webHit, me);
+		me.web.body.createGroupCallback(me.blockCollisionGroup, me.webHit, me);
 
 		var magnitude = 900;
 		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
@@ -278,6 +310,8 @@ Main.prototype = {
 	    me.player.body.collides([
 	        me.blockCollisionGroup,
 	    ]);
+
+		me.player.swinging = false;
 	},
 
 	createRope: function() {
@@ -307,6 +341,7 @@ Main.prototype = {
 	        3,         // damping
 	        [-(me.block.world.x + 500), -(me.block.world.y + me.block.height)]
 	    );
+		me.player.swinging = true;
 
 	    // Draw a line from the player to the block to visually represent the spring
 	    me.line = new Phaser.Line(me.player.x, me.player.y,
