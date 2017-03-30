@@ -10,7 +10,7 @@ Main.prototype = {
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
 		// background
-		me.game.add.sprite(0, -300, 'bg');
+		//me.game.add.sprite(0, -300, 'bg');
 
 	    // Start the P2 Physics Engine
 	    me.game.physics.startSystem(Phaser.Physics.P2JS);
@@ -113,7 +113,7 @@ Main.prototype = {
 
 			// Fill the block with black color
 			blockShape.ctx.rect(0, 0, data.width, data.height);
-			blockShape.ctx.fillStyle = '2a2';
+			blockShape.ctx.fillStyle = '#abc';
 			blockShape.ctx.fill();
 			
 			// // Create a new sprite using the bitmap data
@@ -126,6 +126,7 @@ Main.prototype = {
 			me.platform[index].anchor.setTo(data.x, data.y);
 			me.platform[index].body.setCollisionGroup(me.blockCollisionGroup);
 			me.platform[index].body.collides([
+				me.playerCollisionGroup,
 				me.webCollisionGroup,
 			]);
 			// me.platform[index].inputEnabled = true;
@@ -136,41 +137,25 @@ Main.prototype = {
 			//me.platform[index].body.immovable = true;			
 		}
 
-		var platforData = [
-			{ x: 0, y: me.game.world.height - 64, width: me.game.world.width, height: 64 },
-			{ x: 400, y: 400, width: 200, height: 32 },
-			{ x: 0, y: 200, width: 200, height: 32 }
+		var platformData = [
+			{ x: me.game.world.width/2, y: me.game.world.height - 32, width: me.game.world.width, height: 64 },
+			{ x: me.game.world.width-100, y: 400, width: 200, height: 32 },
+			{ x: 100, y: 200, width: 200, height: 32 }
 		]
 
-		me.platforms = game.add.group();
-		me.platforms.enableBody = true; // enable physics for any object that is created in this group
 		me.platform = [];
-		platforData.forEach(createPlatform);
-
-
-		////////
-		    // the platforms group contains the ground and the ledges we can jump on
-		//platforms = me.game.add.group();
-		//platforms.enableBody = true; // enable physics for any object that is created in this group
-	// 	var ground = me.platforms.create(0, game.world.height - 64, 'ground');
-	// 	ground.scale.setTo(2, 2);
-	// 	ground.body.immovable = true; // stop it from falling away when you jump on it
-	// 	// create two ledges
-	// 	var ledge = me.platforms.create(400, 400, 'ground');
-	// 	ledge.body.immovable = true;
-	// 	ledge = me.platforms.create(-150, 250, 'ground');
-	// 	ledge.body.immovable = true;
+		platformData.forEach(createPlatform);
 	},
 
 	createBlock: function() {
 	    var me = this;
 
 	    // Define a block using bitmap data rather than an image sprite
-	    var blockShape = me.game.add.bitmapData(me.game.world.width, 200);
+	    var blockShape = me.game.add.bitmapData(me.game.world.width, 20);
 
 	    // Fill the block with black color
-	    blockShape.ctx.rect(0, 0, me.game.world.width, 200);
-	    blockShape.ctx.fillStyle = 'abc';
+	    blockShape.ctx.rect(0, 0, me.game.world.width, 20);
+	    blockShape.ctx.fillStyle = '#2b3';
 	    blockShape.ctx.fill();
 
 	    // Create a new sprite using the bitmap data
@@ -245,7 +230,7 @@ Main.prototype = {
 		// instantiate web
 		me.web = game.add.sprite(me.player.x, me.player.y, 'projectile');
 		me.web.anchor.set(0.5, 0.5);
-		me.game.physics.p2.enable([me.web], true);
+		me.game.physics.p2.enable([me.web]);
 		me.web.body.gravity.y = 300;
 	    me.web.body.setCollisionGroup(me.webCollisionGroup);
 	    me.web.body.collides([
@@ -254,7 +239,7 @@ Main.prototype = {
 		// collide the web projectile and the platforms
 		me.web.body.createGroupCallback(me.blockCollisionGroup,me.webHit, me);
 
-		var magnitude = 500;
+		var magnitude = 900;
 		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
 		me.web.body.velocity.x = magnitude * Math.cos(firingAngle) + me.player.body.velocity.x;
 		me.web.body.velocity.y = magnitude * Math.sin(firingAngle) + me.player.body.velocity.y;
@@ -270,7 +255,8 @@ Main.prototype = {
 		console.log('web hit', web.x, web.y);
 		me.newRope(block, me.web);
 		// remove the projectile - the rope remains
-		me.web.safeDestroy = true;
+		me.web.body.removeNextStep = true;
+		me.web.destroy();
 	},
 
 	createPlayer: function() {
