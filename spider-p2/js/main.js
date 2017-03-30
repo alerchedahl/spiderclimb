@@ -49,6 +49,22 @@ Main.prototype = {
 	    me.createRope();
 	},
 
+	playerStanding: function() {
+	    var me = this;
+
+		var yAxis = p2.vec2.fromValues(0, 1);
+		var result = false;
+		function checkConstraint(c) {
+			if (c.bodyA === me.player.body.data || c.bodyB === me.player.body.data) {
+				var d = p2.vec2.dot(c.normalA, yAxis); // Normal dot Y-axis
+				if (c.bodyA === me.player.body.data) d *= -1;
+				if (d > 0.5) result = true; // cos(60 degrees) = 0.5, so we can lean 30 degrees
+			}
+		}
+		game.physics.p2.world.narrowphase.contactEquations.forEach(checkConstraint);
+		return result;
+	},
+
 	update: function() {
 	    var me = this;
 
@@ -56,23 +72,8 @@ Main.prototype = {
    		me.arrow.x = me.player.x;
     	me.arrow.y = me.player.y;
 
-		me.standing = me.player.body.touching && me.player.body.touching.down;
+		me.standing = me.playerStanding();//me.player.body.touching && me.player.body.touching.down;
 		me.extraWeb = false;
-
-		// function checkIfCanJump() {
-		// 	var yAxis = p2.vec2.fromValues(0, 1);
-		// 	var result = false;
-		// 	for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {
-		// 		var c = game.physics.p2.world.narrowphase.contactEquations[i];
-		// 		if (c.bodyA === player.body.data || c.bodyB === player.body.data) {
-		// 			var d = p2.vec2.dot(c.normalA, yAxis); // Normal dot Y-axis
-		// 			if (c.bodyA === player.body.data) d *= -1;
-		//             if (d > 0.5) result = true;
-		//         }
-		//     }
-	    //     return result;
-		// }
-
 
 		if (me.spaceKey.justUp) {
 			if (!me.player.swinging || me.extraWeb) {
