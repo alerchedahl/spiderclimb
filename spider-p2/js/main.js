@@ -10,7 +10,7 @@ Main.prototype = {
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
 		// background
-		//me.game.add.sprite(0, -300, 'bg');
+		me.game.add.sprite(0, -300, 'bg');
 
 	    // Start the P2 Physics Engine
 	    me.game.physics.startSystem(Phaser.Physics.P2JS);
@@ -84,7 +84,7 @@ Main.prototype = {
 			}
 		}
 
-		if (me.cursors.up.justUp) {
+		if (me.cursors.up.justUp && me.player.swinging) {
 			me.pullRope();
 		}
 
