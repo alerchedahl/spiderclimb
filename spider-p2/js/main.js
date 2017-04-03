@@ -75,8 +75,16 @@ Main.prototype = {
 		me.standing = me.playerStanding();//me.player.body.touching && me.player.body.touching.down;
 		me.extraWeb = false;
 
+		me.canShoot = !me.player.swinging || me.extraWeb;
+
+		if (me.canShoot) {
+			me.arrow.alpha = 1;
+		} else {
+			me.arrow.alpha = 0;
+		}
+
 		if (me.spaceKey.justUp) {
-			if (!me.player.swinging || me.extraWeb) {
+			if (me.canShoot) {
 				me.fire();
 			}
 			else {
