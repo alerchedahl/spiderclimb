@@ -261,6 +261,7 @@ Main.prototype = {
 	    //Remove last spring
 	    me.game.physics.p2.removeSpring(me.rope);
 		me.player.swinging = false;
+		me.clearRope();
 	},
 
 	fire: function() {
@@ -355,6 +356,12 @@ Main.prototype = {
 	    // Draw a line from the player to the block to visually represent the spring
 	    me.line = new Phaser.Line(me.player.x, me.player.y,
 	        (me.block.world.x + 500), (me.block.world.y + me.block.height));
+	},
+
+	clearRope: function() {
+	    var me = this;
+
+	    me.ropeBitmapData.clear();
 	},
 
 	drawRope: function() {
