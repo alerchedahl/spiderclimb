@@ -33,7 +33,8 @@ Main.prototype = {
 		// Register keys
 		me.registerKeys();
 
-		me.createPlatforms();
+		// Create the level - platforms and enemies
+		me.createLevel();
 
 	    // Create the ceiling
 	    me.createBlock();
@@ -135,7 +136,7 @@ Main.prototype = {
 		//me.cursors.up.onInputDown(me.pullRope);
 	},
 
-	createPlatforms: function () {
+	createLevel: function () {
 	    var me = this;
 
 		function createPlatform(data, index) {
@@ -160,22 +161,9 @@ Main.prototype = {
 				me.playerCollisionGroup,
 				me.webCollisionGroup,
 			]);
-			// me.platform[index].inputEnabled = true;
-			// me.platform[index].events.onInputDown.add(me.changeRope, this);
-
-
-			//me.platform[index] = me.platforms.create(data.x, data.y, 'ground');
-			//me.platform[index].body.immovable = true;			
 		}
-
-		var platformData = [
-			{ x: me.game.world.width/2, y: me.game.world.height - 32, width: me.game.world.width, height: 64 },
-			{ x: me.game.world.width-100, y: 400, width: 200, height: 32 },
-			{ x: 100, y: 200, width: 200, height: 32 }
-		]
-
 		me.platform = [];
-		platformData.forEach(createPlatform);
+		level1.staticPlatforms.forEach(createPlatform);
 	},
 
 	createBlock: function() {
