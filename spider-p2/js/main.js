@@ -139,7 +139,7 @@ Main.prototype = {
 	createLevel: function () {
 	    var me = this;
 
-		function createPlatform(data, index) {
+		function createPlatform(data) {
 			// // Define a block using bitmap data rather than an image sprite
 			var blockShape = me.game.add.bitmapData(data.width, data.height);
 
@@ -149,20 +149,18 @@ Main.prototype = {
 			blockShape.ctx.fill();
 			
 			// // Create a new sprite using the bitmap data
-			me.platform[index] = me.game.add.sprite(data.x, data.y, blockShape);
-// 			me.platform[index] = me.game.add.sprite(data.x, data.y, 'ground');
+			var platform = me.game.add.sprite(data.x, data.y, blockShape);
 
 			// // Enable P2 Physics and set the block not to move
-			me.game.physics.p2.enable([me.platform[index]], true);
-			me.platform[index].body.static = true;
-			me.platform[index].anchor.setTo(data.x, data.y);
-			me.platform[index].body.setCollisionGroup(me.blockCollisionGroup);
-			me.platform[index].body.collides([
+			me.game.physics.p2.enable([platform], true);
+			platform.body.static = true;
+			platform.anchor.setTo(data.x, data.y);
+			platform.body.setCollisionGroup(me.blockCollisionGroup);
+			platform.body.collides([
 				me.playerCollisionGroup,
 				me.webCollisionGroup,
 			]);
 		}
-		me.platform = [];
 		level1.staticPlatforms.forEach(createPlatform);
 	},
 
