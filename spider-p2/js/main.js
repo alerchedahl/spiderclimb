@@ -7,6 +7,8 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
+		var level = level2;
+
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
 		// background
@@ -27,21 +29,14 @@ Main.prototype = {
 		// Set the gravity
 	    me.game.physics.p2.gravity.y = 1000;
 
-	    // Create a random generator
-	    var seed = Date.now();
-	    me.random = new Phaser.RandomDataGenerator([seed]);
-
 		// Register keys
 		me.registerKeys();
 
 		// Create the level - platforms and enemies
-		me.createLevel(level2);
-
-	    // Create the ceiling
-	    me.createBlock();
+		me.createLevel(level);
 
 	    // Create the player
-	    me.createPlayer();
+	    me.createPlayer(level);
 
 	    // arrow
     	me.arrow = game.add.sprite(me.player.x, me.player.y, 'arrow');
@@ -198,30 +193,6 @@ Main.prototype = {
 		level.winPortals.forEach(createWinPortal);
 	},
 
-	createBlock: function() {
-	    var me = this;
-
-	    // Define a block using bitmap data rather than an image sprite
-	    var blockShape = me.game.add.bitmapData(me.game.world.width, 20);
-
-	    // Fill the block with black color
-	    blockShape.ctx.rect(0, 0, me.game.world.width, 20);
-	    blockShape.ctx.fillStyle = '#2b3';
-	    blockShape.ctx.fill();
-
-	    // Create a new sprite using the bitmap data
-	    me.block = me.game.add.sprite(0, 0, blockShape);
-
-	    // Enable P2 Physics and set the block not to move
-	    me.game.physics.p2.enable(me.block);
-	    me.block.body.static = true;
-	    me.block.anchor.setTo(0, 0);
-
-	    // Enable clicking on block and trigger a function when it is clicked
-    	me.block.inputEnabled = true;
-	    me.block.events.onInputDown.add(me.changeRope, this);
-	},
-
 	newRope: function(body, point) {
 	    var me = this;
 
@@ -236,24 +207,8 @@ Main.prototype = {
 		// console.log('New rope with length', len);
 		// console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = point.x;
-	    me.ropeAnchorY = point.y
-	},
-
-	changeRope: function(sprite, pointer) {
-	    var me = this;
-
-	    //Remove last spring
-	    me.game.physics.p2.removeSpring(me.rope);
-
-	    //Create new spring at pointer x and y
-		var len = Phaser.Point.distance(me.player, pointer, false);
-		var pull = 1
-	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, len*pull, 100, 3, [-pointer.x, -pointer.y]);
-		me.player.swinging = true;
-		// console.log('Changed to rope with length', len);
-		// console.log('Rope now has length', me.rope.data.restLength);
-	    me.ropeAnchorX = pointer.x;
-	    me.ropeAnchorY = pointer.y
+	    me.ropeAnchorY = point.y;
+		me.ropeAnchorBody = body;
 	},
 
 	pullRope: function() {
@@ -272,7 +227,7 @@ Main.prototype = {
 	    //Remove last spring
 	    me.game.physics.p2.removeSpring(me.rope);
 
-	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, newLen, 100, 3, [-me.ropeAnchorX, -me.ropeAnchorY]);
+	    me.rope = me.game.physics.p2.createSpring(me.ropeAnchorBody, me.player, newLen, 100, 3, [-me.ropeAnchorX, -me.ropeAnchorY]);
 	},
 
 	cutRope: function() {
@@ -321,11 +276,11 @@ Main.prototype = {
 		me.web.destroy();
 	},
 
-	createPlayer: function() {
+	createPlayer: function(level) {
 	    var me = this;
 
 	    // Add the player to the game
-	    me.player = me.game.add.sprite(200, 400, 'spider');
+	    me.player = me.game.add.sprite(level.start.x, level.start.y, 'spider');
 
 	    // Enable physics, use "true" to enable debug drawing
 	    me.game.physics.p2.enable([me.player], false);
@@ -372,27 +327,9 @@ Main.prototype = {
 
 	    // Create a new sprite using the bitmap data
 	    me.line = game.add.sprite(0, 0, me.ropeBitmapData);
-
-	    // Keep track of where the rope is anchored
-	    me.ropeAnchorX = (me.block.world.x + 500);
-	    me.ropeAnchorY = (me.block.world.y + me.block.height);
-
-	    // Create a spring between the player and block to act as the rope
-	    me.rope = me.game.physics.p2.createSpring(
-	        me.block,  // sprite 1
-	        me.player, // sprite 2
-	        300,       // length of the rope
-	        10,        // stiffness
-	        3,         // damping
-	        [-(me.block.world.x + 500), -(me.block.world.y + me.block.height)]
-	    );
-		me.player.swinging = true;
-
-	    // Draw a line from the player to the block to visually represent the spring
-	    me.line = new Phaser.Line(me.player.x, me.player.y,
-	        (me.block.world.x + 500), (me.block.world.y + me.block.height));
+		// if player should start out swinging, add spring and line here
 	},
-
+	
 	clearRope: function() {
 	    var me = this;
 

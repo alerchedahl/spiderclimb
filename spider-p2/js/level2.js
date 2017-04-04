@@ -1,7 +1,7 @@
 level2 = {
     width: 800,
     height: 600,
-    start: { x: 50, y: 300 },
+    start: { x: 50, y: 350 },
     staticPlatforms: [
         { x: 400, y: 200, width: 200, height: 32, deadly: false },
         { x: 100, y: 400, width: 200, height: 32, deadly: false },
