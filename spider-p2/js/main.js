@@ -19,7 +19,8 @@ Main.prototype = {
 	    me.playerCollisionGroup = me.game.physics.p2.createCollisionGroup();
 	    me.webCollisionGroup = me.game.physics.p2.createCollisionGroup();
 	    me.blockCollisionGroup = me.game.physics.p2.createCollisionGroup();
-
+	    me.killCollisionGroup = me.game.physics.p2.createCollisionGroup();
+	    me.winCollisionGroup = me.game.physics.p2.createCollisionGroup();
 
 		game.physics.p2.setImpactEvents(true);
 	    
@@ -34,7 +35,7 @@ Main.prototype = {
 		me.registerKeys();
 
 		// Create the level - platforms and enemies
-		me.createLevel();
+		me.createLevel(level2);
 
 	    // Create the ceiling
 	    me.createBlock();
@@ -136,16 +137,20 @@ Main.prototype = {
 		//me.cursors.up.onInputDown(me.pullRope);
 	},
 
-	createLevel: function () {
+	createLevel: function (level) {
 	    var me = this;
 
 		function createPlatform(data) {
 			// // Define a block using bitmap data rather than an image sprite
 			var blockShape = me.game.add.bitmapData(data.width, data.height);
 
-			// Fill the block with black color
+			// Fill the block with color
 			blockShape.ctx.rect(0, 0, data.width, data.height);
-			blockShape.ctx.fillStyle = '#abc';
+			if (data.deadly) {
+				blockShape.ctx.fillStyle = '#a23';
+			} else {
+				blockShape.ctx.fillStyle = '#abc';
+			}
 			blockShape.ctx.fill();
 			
 			// // Create a new sprite using the bitmap data
@@ -155,13 +160,42 @@ Main.prototype = {
 			me.game.physics.p2.enable([platform], true);
 			platform.body.static = true;
 			platform.anchor.setTo(data.x, data.y);
-			platform.body.setCollisionGroup(me.blockCollisionGroup);
+			if (data.deadly) {
+				platform.body.setCollisionGroup(me.killCollisionGroup);
+			} else {
+				platform.body.setCollisionGroup(me.blockCollisionGroup);
+			}
 			platform.body.collides([
 				me.playerCollisionGroup,
 				me.webCollisionGroup,
 			]);
 		}
-		level1.staticPlatforms.forEach(createPlatform);
+
+		function createWinPortal(data) { // should use sprite
+			// // Define a block using bitmap data rather than an image sprite
+			var blockShape = me.game.add.bitmapData(32, 16);
+
+			// Fill the block with color
+			blockShape.ctx.rect(0, 0, 32, 16);
+			blockShape.ctx.fillStyle = '#000';
+			blockShape.ctx.fill();
+			
+			// // Create a new sprite using the bitmap data
+			var platform = me.game.add.sprite(data.x, data.y, blockShape);
+
+			// // Enable P2 Physics and set the block not to move
+			me.game.physics.p2.enable([platform], true);
+			platform.body.static = true;
+			platform.anchor.setTo(data.x, data.y);
+			platform.body.setCollisionGroup(me.winCollisionGroup);
+			platform.body.collides([
+				me.playerCollisionGroup,
+				me.webCollisionGroup,
+			]);
+		}
+		
+		level.staticPlatforms.forEach(createPlatform);
+		level.winPortals.forEach(createWinPortal);
 	},
 
 	createBlock: function() {
@@ -199,8 +233,8 @@ Main.prototype = {
 		var pull = 1
 	    me.rope = me.game.physics.p2.createSpring(body, me.player, len*pull, 100, 3, [-point.x, -point.y]);
 		me.player.swinging = true;
-		console.log('New rope with length', len);
-		console.log('Rope now has length', me.rope.data.restLength);
+		// console.log('New rope with length', len);
+		// console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = point.x;
 	    me.ropeAnchorY = point.y
 	},
@@ -216,24 +250,24 @@ Main.prototype = {
 		var pull = 1
 	    me.rope = me.game.physics.p2.createSpring(me.block, me.player, len*pull, 100, 3, [-pointer.x, -pointer.y]);
 		me.player.swinging = true;
-		console.log('Changed to rope with length', len);
-		console.log('Rope now has length', me.rope.data.restLength);
+		// console.log('Changed to rope with length', len);
+		// console.log('Rope now has length', me.rope.data.restLength);
 	    me.ropeAnchorX = pointer.x;
 	    me.ropeAnchorY = pointer.y
 	},
 
 	pullRope: function() {
-	    console.log('pull');
+	    // console.log('pull');
 		var me = this;
 
 	    //Create new spring with shorter rest length
 		//var len = me.rope.data.restLength;
 		var len = Phaser.Point.distance(me.player, { x: me.ropeAnchorX, y: me.ropeAnchorY }, false);
-		console.log('Rope had length', len);
+		// console.log('Rope had length', len);
 		var step = 30;
 		var newLen = Math.max(len-step, 3);
-		console.log('Pulled to rope with length', newLen);
-		console.log('Rope now has length', me.rope.data.restLength);
+		// console.log('Pulled to rope with length', newLen);
+		// console.log('Rope now has length', me.rope.data.restLength);
 
 	    //Remove last spring
 	    me.game.physics.p2.removeSpring(me.rope);
@@ -251,7 +285,7 @@ Main.prototype = {
 	},
 
 	fire: function() {
-		console.log('Fire!');
+		// console.log('Fire!');
 		var me = this;
 
 		if (me.web) me.web.kill();
@@ -280,7 +314,7 @@ Main.prototype = {
 	webHit: function(web, block, webShape, blockShape) {
 	    var me = this;
 
-		console.log('web hit', web.x, web.y);
+		// console.log('web hit', web.x, web.y);
 		me.newRope(block, me.web);
 		// remove the projectile - the rope remains
 		me.web.body.removeNextStep = true;
@@ -305,9 +339,24 @@ Main.prototype = {
 	    me.player.body.setCollisionGroup(me.playerCollisionGroup);
 	    me.player.body.collides([
 	        me.blockCollisionGroup,
+	        me.killCollisionGroup,
+	        me.winCollisionGroup,
 	    ]);
 
+		// collide the player and deadly platforms
+		me.player.body.createGroupCallback(me.killCollisionGroup, me.playerHit, me);
+		// collide the player and win portals
+		me.player.body.createGroupCallback(me.winCollisionGroup, me.playerWin, me);
+
 		me.player.swinging = false;
+	},
+
+	playerHit: function() {
+		console.log('We died!');
+	},
+
+	playerWin: function() {
+		console.log('We win!');
 	},
 
 	createRope: function() {
