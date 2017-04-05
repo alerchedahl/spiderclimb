@@ -7,7 +7,7 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
-		var level = level2;
+		var level = level3;
 
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
@@ -144,7 +144,7 @@ Main.prototype = {
 			if (data.deadly) {
 				blockShape.ctx.fillStyle = '#a23';
 			} else {
-				blockShape.ctx.fillStyle = '#abc';
+				blockShape.ctx.fillStyle = '#567';
 			}
 			blockShape.ctx.fill();
 			
@@ -152,9 +152,9 @@ Main.prototype = {
 			var platform = me.game.add.sprite(data.x, data.y, blockShape);
 
 			// // Enable P2 Physics and set the block not to move
-			me.game.physics.p2.enable([platform], true);
+			me.game.physics.p2.enable([platform]);
 			platform.body.static = true;
-			platform.anchor.setTo(data.x, data.y);
+			//platform.anchor.setTo(data.x, data.y);
 			if (data.deadly) {
 				platform.body.setCollisionGroup(me.killCollisionGroup);
 			} else {
@@ -166,22 +166,13 @@ Main.prototype = {
 			]);
 		}
 
-		function createWinPortal(data) { // should use sprite
-			// // Define a block using bitmap data rather than an image sprite
-			var blockShape = me.game.add.bitmapData(32, 16);
+		function createWinPortal(data) {
+			// Create a new sprite
+			var platform = me.game.add.sprite(data.x, data.y, 'dwelling');
 
-			// Fill the block with color
-			blockShape.ctx.rect(0, 0, 32, 16);
-			blockShape.ctx.fillStyle = '#000';
-			blockShape.ctx.fill();
-			
-			// // Create a new sprite using the bitmap data
-			var platform = me.game.add.sprite(data.x, data.y, blockShape);
-
-			// // Enable P2 Physics and set the block not to move
-			me.game.physics.p2.enable([platform], true);
+			// Enable P2 Physics and set the block not to move
+			me.game.physics.p2.enable([platform]);
 			platform.body.static = true;
-			platform.anchor.setTo(data.x, data.y);
 			platform.body.setCollisionGroup(me.winCollisionGroup);
 			platform.body.collides([
 				me.playerCollisionGroup,
@@ -283,7 +274,7 @@ Main.prototype = {
 	    me.player = me.game.add.sprite(level.start.x, level.start.y, 'spider');
 
 	    // Enable physics, use "true" to enable debug drawing
-	    me.game.physics.p2.enable([me.player], false);
+	    me.game.physics.p2.enable([me.player]);
 
 	    // Get rid of current bounding box
 	    //me.player.body.clearShapes();
