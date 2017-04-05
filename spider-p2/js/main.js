@@ -7,7 +7,8 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
-		var level = level3;
+		var levels = [ level1, level2, level3 ];
+		var level = levels[this.game.state.level];
 
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
@@ -69,7 +70,7 @@ Main.prototype = {
    		me.arrow.x = me.player.x;
     	me.arrow.y = me.player.y;
 
-		me.standing = me.playerStanding();//me.player.body.touching && me.player.body.touching.down;
+		me.standing = me.playerStanding();
 		me.extraWeb = false;
 
 		me.canShoot = !me.player.swinging || me.extraWeb;
@@ -118,7 +119,6 @@ Main.prototype = {
 		if (me.player.swinging) {
 		    me.drawRope();
 		}
-//		me.platform[0].key.render();
 	},
 
 	registerKeys: function() {
@@ -129,7 +129,6 @@ Main.prototype = {
         me.game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
 
 	    me.cursors = game.input.keyboard.createCursorKeys();
-		//me.cursors.up.onInputDown(me.pullRope);
 	},
 
 	createLevel: function (level) {
@@ -299,10 +298,22 @@ Main.prototype = {
 
 	playerHit: function() {
 		console.log('We died!');
+		this.game.state.lives -= 1;
+		if (this.game.state.lives > 0) {
+			this.game.state.start("Main");
+		} else {
+			this.game.state.start("GameOver");			
+		}
 	},
 
 	playerWin: function() {
 		console.log('We win!');
+		this.game.state.level += 1;
+		if (this.game.state.level <= this.game.state.maxLevel) {
+			this.game.state.start("Main");
+		} else {
+			this.game.state.start("GameWon");			
+		}
 	},
 
 	createRope: function() {
