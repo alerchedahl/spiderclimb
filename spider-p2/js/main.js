@@ -311,6 +311,7 @@ Main.prototype = {
 		console.log('We win!');
 		this.game.state.level += 1;
 		console.log('On to level', this.game.state.level);
+		this.game.state.clearCurrentState();
 		if (this.game.state.level <= this.game.state.maxLevel) {
 			this.game.state.start("Main");
 		} else {
