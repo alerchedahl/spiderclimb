@@ -9,6 +9,7 @@ Main.prototype = {
 
 		var levels = [ level1, level2, level3 ];
 		var level = levels[this.game.state.level];
+		console.log('Creating level ', this.game.state.level);
 
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
@@ -309,6 +310,7 @@ Main.prototype = {
 	playerWin: function() {
 		console.log('We win!');
 		this.game.state.level += 1;
+		console.log('On to level', this.game.state.level);
 		if (this.game.state.level <= this.game.state.maxLevel) {
 			this.game.state.start("Main");
 		} else {

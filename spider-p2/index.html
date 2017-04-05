@@ -12,6 +12,7 @@
 	<script type="text/javascript" src="js/level3.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
 	<script type="text/javascript" src="js/gameover.js"></script>
+	<script type="text/javascript" src="js/gamewon.js"></script>
     <style type="text/css">
 		body {
 			background-color: #000;
@@ -38,6 +39,7 @@
 				game.state.add("GameTitle", GameTitle);
 				game.state.add("Main", Main);
 				game.state.add("GameOver", GameOver);
+				game.state.add("GameWon", GameWon);
 
 				//Start the first state
 				game.state.start("Boot");
