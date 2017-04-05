@@ -7,9 +7,9 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
-		var levels = [ level1, level2, level3 ];
+		var levels = [ level1, level2, level3, level4 ];
 		var level = levels[this.game.state.level];
-		console.log('Creating level ', this.game.state.level);
+		//console.log('Creating level ', this.game.state.level);
 
 	    // Set the background colour to blue
 	    me.game.stage.backgroundColor = '#ccddff';
@@ -300,6 +300,7 @@ Main.prototype = {
 	playerHit: function() {
 		console.log('We died!');
 		this.game.state.lives -= 1;
+		console.log('lives: ', this.game.state.lives);
 		if (this.game.state.lives > 0) {
 			this.game.state.start("Main");
 		} else {
@@ -310,7 +311,7 @@ Main.prototype = {
 	playerWin: function() {
 		console.log('We win!');
 		this.game.state.level += 1;
-		console.log('On to level', this.game.state.level);
+		// console.log('On to level', this.game.state.level);
 		this.game.state.clearCurrentState();
 		if (this.game.state.level <= this.game.state.maxLevel) {
 			this.game.state.start("Main");

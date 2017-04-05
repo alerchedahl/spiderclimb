@@ -16,7 +16,7 @@ Preload.prototype = {
 	create: function(){
 		this.game.state.lives = 5;
 		this.game.state.level = 0;
-		this.game.state.maxLevel = 2;
+		this.game.state.maxLevel = 3;
 		this.game.state.start("Main");
 	}
 }
