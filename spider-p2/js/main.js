@@ -10,8 +10,6 @@ Main.prototype = {
 		var level = levels[this.game.state.level];
 		//console.log('Creating level ', this.game.state.level);
 
-	    // Set the background colour to blue
-	    me.game.stage.backgroundColor = '#ccddff';
 		// background
 		me.game.add.sprite(0, -300, 'bg');
 
