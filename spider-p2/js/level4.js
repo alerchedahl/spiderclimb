@@ -1,4 +1,4 @@
-level4 = {
+levels[4] = {
     width: 800,
     height: 600,
     start: { x: 50, y: 370 },

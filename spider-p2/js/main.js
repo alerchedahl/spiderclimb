@@ -7,7 +7,6 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
-		var levels = [ level1, level2, level3, level4 ];
 		var level = levels[this.game.state.level];
 		//console.log('Creating level ', this.game.state.level);
 
