@@ -21,6 +21,7 @@ Main.prototype = {
 	    me.webCollisionGroup = me.game.physics.p2.createCollisionGroup();
 	    me.blockCollisionGroup = me.game.physics.p2.createCollisionGroup();
 	    me.killCollisionGroup = me.game.physics.p2.createCollisionGroup();
+	    me.nonstickCollisionGroup = me.game.physics.p2.createCollisionGroup();
 	    me.winCollisionGroup = me.game.physics.p2.createCollisionGroup();
 
 		game.physics.p2.setImpactEvents(true);
@@ -138,11 +139,12 @@ Main.prototype = {
 
 			// Fill the block with color
 			blockShape.ctx.rect(0, 0, data.width, data.height);
-			if (data.deadly) {
-				blockShape.ctx.fillStyle = '#a23';
-			} else {
-				blockShape.ctx.fillStyle = '#567';
-			}
+			var colours = {
+				'default': '#567',
+				'fire': '#a23',
+				'nonstick': '#23a',
+			};
+			blockShape.ctx.fillStyle = colours[data.block];
 			blockShape.ctx.fill();
 			
 			// // Create a new sprite using the bitmap data
@@ -152,11 +154,12 @@ Main.prototype = {
 			me.game.physics.p2.enable([platform]);
 			platform.body.static = true;
 			//platform.anchor.setTo(data.x, data.y);
-			if (data.deadly) {
-				platform.body.setCollisionGroup(me.killCollisionGroup);
-			} else {
-				platform.body.setCollisionGroup(me.blockCollisionGroup);
-			}
+			var collisionGroups = {
+				'default': me.blockCollisionGroup,
+				'fire': me.killCollisionGroup,
+				'nonstick': me.nonstickCollisionGroup,
+			};
+			platform.body.setCollisionGroup(collisionGroups[data.block]);
 			platform.body.collides([
 				me.playerCollisionGroup,
 				me.webCollisionGroup,
@@ -240,9 +243,13 @@ Main.prototype = {
 	    me.web.body.setCollisionGroup(me.webCollisionGroup);
 	    me.web.body.collides([
 	        me.blockCollisionGroup,
+			me.killCollisionGroup,
+			me.nonstickCollisionGroup,
 	    ]);
 		// collide the web projectile and the platforms
 		me.web.body.createGroupCallback(me.blockCollisionGroup, me.webHit, me);
+		me.web.body.createGroupCallback(me.killCollisionGroup, me.webFlopped, me);
+		me.web.body.createGroupCallback(me.nonstickCollisionGroup, me.webFlopped, me);
 
 		var magnitude = 900;
 		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
@@ -259,6 +266,16 @@ Main.prototype = {
 
 		// console.log('web hit', web.x, web.y);
 		me.newRope(block, me.web);
+		// remove the projectile - the rope remains
+		me.web.body.removeNextStep = true;
+		me.web.destroy();
+	},
+
+	webFlopped: function(web, block, webShape, blockShape) {
+	    var me = this;
+
+		// console.log('web hit', web.x, web.y);
+		//me.newRope(block, me.web);
 		// remove the projectile - the rope remains
 		me.web.body.removeNextStep = true;
 		me.web.destroy();
@@ -283,6 +300,7 @@ Main.prototype = {
 	    me.player.body.collides([
 	        me.blockCollisionGroup,
 	        me.killCollisionGroup,
+	        me.nonstickCollisionGroup,
 	        me.winCollisionGroup,
 	    ]);
 

@@ -3,12 +3,12 @@ levels[4] = {
     height: 600,
     start: { x: 50, y: 370 },
     staticPlatforms: [
-        { x: 250, y: 100, width: 20, height: 32, deadly: false },
-        { x: 550, y: 200, width: 20, height: 32, deadly: false },
-        { x: 100, y: 400, width: 200, height: 32, deadly: false },
-        { x: 700, y: 400, width: 200, height: 32, deadly: false },
-        { x: 400, y: 584, width: 800, height: 32, deadly: true },
-        { x: 610, y: 432, width: 20, height: 32, deadly: true },
+        { x: 250, y: 100, width: 20, height: 32, block: 'default' },
+        { x: 550, y: 200, width: 20, height: 32, block: 'default' },
+        { x: 100, y: 400, width: 200, height: 32, block: 'default' },
+        { x: 700, y: 400, width: 200, height: 32, block: 'default' },
+        { x: 400, y: 584, width: 800, height: 32, block: 'fire' },
+        { x: 610, y: 432, width: 20, height: 32, block: 'fire' },
     ],
     movingPlatforms: [
 
