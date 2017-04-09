@@ -13,6 +13,11 @@ Main.prototype = {
 		// background
 		me.game.add.sprite(0, -300, 'bg');
 
+		// lives
+		for (l = 0; l < this.game.state.lives; l++) {
+			me.game.add.sprite(10 + 35*l, 10, 'spider');
+		}
+
 	    // Start the P2 Physics Engine
 	    me.game.physics.startSystem(Phaser.Physics.P2JS);
 
