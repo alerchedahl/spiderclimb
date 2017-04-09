@@ -8,7 +8,7 @@ levels[4] = {
         { x: 100, y: 400, width: 200, height: 32, block: 'default' },
         { x: 700, y: 400, width: 200, height: 32, block: 'default' },
         { x: 400, y: 584, width: 800, height: 32, block: 'fire' },
-        { x: 610, y: 432, width: 20, height: 32, block: 'fire' },
+        { x: 610, y: 492, width: 20, height: 152, block: 'fire' },
     ],
     movingPlatforms: [
 
