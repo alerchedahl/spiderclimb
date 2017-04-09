@@ -18,6 +18,9 @@ Main.prototype = {
 			me.game.add.sprite(10 + 35*l, 10, 'spider');
 		}
 
+		// level
+		levelText(this.game, 'Level ' + this.game.state.level);
+
 	    // Start the P2 Physics Engine
 	    me.game.physics.startSystem(Phaser.Physics.P2JS);
 
