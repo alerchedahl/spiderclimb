@@ -10,6 +10,8 @@
 
 # Game mechanics
 * wind
+* ability to grab and release a weight
+* ability to grab platforms/sides of walls, even ceilings?
 * multiple webs at once
 * moving platforms
 * enemies: birds?
