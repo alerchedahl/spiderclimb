@@ -18,3 +18,5 @@
 * power-ups: flies
 * have web wrap around blocks (could be hard to achieve)
 * world bounds?
+* controls revamp: aiming as primary 'state', walking as secondary. Maybe up/down controls state so down is crawling (moving) and up is 'standing' (aiming).
+* picking up objects to gain mass (affects walking speed), dropping objects mid-swing for awesome spring mechanics
