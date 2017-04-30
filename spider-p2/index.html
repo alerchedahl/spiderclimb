@@ -1,6 +1,6 @@
-<!doctype html> 
-<html lang="en"> 
-<head> 
+<!doctype html>
+<html lang="en">
+<head>
 	<meta charset="UTF-8" />
 	<title>SpiderClimb</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
@@ -22,15 +22,13 @@
     <style type="text/css">
 		body {
 			background-color: #000;
+			margin: 0;
 		}
 		canvas {
 			position: absolute;
-			/*left: 50%;
-			top: 50%;*/
-			/*margin-left: -400px;
-			margin-top: -300px;*/
-			/*width: 800px;
-			height: 600px;*/
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
 		}
     </style>
     <script type="text/javascript">
@@ -38,7 +36,7 @@
 
 				//Create a new game that fills the screen
 				game = new Phaser.Game(800, 600, Phaser.AUTO);
-				
+
 				//Add all states
 				game.state.add("Boot", Boot);
 				game.state.add("Preload", Preload);

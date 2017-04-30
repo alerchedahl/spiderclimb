@@ -11,7 +11,7 @@ Main.prototype = {
 		//console.log('Creating level ', this.game.state.level);
 
 		// background
-		me.game.add.sprite(0, -300, 'bg');
+		me.game.add.sprite(0, 0, 'bg');
 
 		// lives
 		for (l = 0; l < this.game.state.lives; l++) {
@@ -142,6 +142,7 @@ Main.prototype = {
 	    var me = this;
 
 		function createPlatform(data) {
+			/*
 			// // Define a block using bitmap data rather than an image sprite
 			var blockShape = me.game.add.bitmapData(data.width, data.height);
 
@@ -157,6 +158,20 @@ Main.prototype = {
 			
 			// // Create a new sprite using the bitmap data
 			var platform = me.game.add.sprite(data.x, data.y, blockShape);
+			*/
+			var spriteName = "";
+			switch (data.block) {
+				case 'default':
+					spriteName = 'dirt';
+					break;
+				case 'fire':
+					spriteName = 'fire';
+					break;
+				case 'nonstick':
+					spriteName = 'metal';
+					break;
+			}
+			var platform = me.game.add.tileSprite(data.x, data.y, data.width, data.height, spriteName);
 
 			// // Enable P2 Physics and set the block not to move
 			me.game.physics.p2.enable([platform]);

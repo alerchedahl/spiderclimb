@@ -4,7 +4,7 @@ GameTitle.prototype = {
 
 	create: function(){
 	    // Set the background colour to blue
-	    this.game.stage.backgroundColor = '#ccddff';
+	    this.game.stage.backgroundColor = '#dafff7';
 
 		titleText(this.game, 'Spider Climb!');
 		subtitleText(this.game, 'Press space to start');
