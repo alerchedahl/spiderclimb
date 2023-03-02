@@ -122,6 +122,22 @@ Main.prototype = {
 			}
 		}
 
+		if (me.num4.isDown) {
+			me.levelTeleport(4);
+		}
+
+		if (me.num5.isDown) {
+			me.levelTeleport(5);
+		}
+		
+		if (me.num6.isDown) {
+			me.levelTeleport(6);
+		}
+		
+		if (me.num7.isDown) {
+			me.levelTeleport(7);
+		}
+		
 	    //Update the position of the rope
 		if (me.player.swinging) {
 		    me.drawRope();
@@ -135,7 +151,12 @@ Main.prototype = {
     	// stop the following keys from propagating up to the browser
         me.game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
 
-	    me.cursors = game.input.keyboard.createCursorKeys();
+		me.cursors = game.input.keyboard.createCursorKeys();
+
+		me.num4 = game.input.keyboard.addKey(Phaser.Keyboard.FOUR);
+		me.num5 = game.input.keyboard.addKey(Phaser.Keyboard.FIVE);
+		me.num6 = game.input.keyboard.addKey(Phaser.Keyboard.SIX);
+		me.num7 = game.input.keyboard.addKey(Phaser.Keyboard.SEVEN);
 	},
 
 	createLevel: function (level) {
@@ -334,6 +355,18 @@ Main.prototype = {
 	playerWin: function() {
 		console.log('We win!');
 		this.game.state.level += 1;
+		// console.log('On to level', this.game.state.level);
+		this.game.state.clearCurrentState();
+		if (this.game.state.level <= this.game.state.maxLevel) {
+			this.game.state.start("Main");
+		} else {
+			this.game.state.start("GameWon");			
+		}
+	},
+
+	levelTeleport: function(level) {
+		console.log('We jump to level ' + level);
+		this.game.state.level = level;
 		// console.log('On to level', this.game.state.level);
 		this.game.state.clearCurrentState();
 		if (this.game.state.level <= this.game.state.maxLevel) {
