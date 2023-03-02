@@ -84,15 +84,23 @@ Main.prototype = {
 		var pointer = this.input.activePointer;
 
 		if (pointer.leftButton.isDown) {
-			me.leftPressed = true;
+			me.leftDown = true;
+			if (me.leftUp) {
+				me.leftPressed = true;
+			} else {
+				me.leftPressed = false;
+			}
+			me.leftUp = false;
 			me.leftReleased = false;
 		}
-		if (pointer.leftButton.isUp) {
-			if (me.leftPressed) {
+		else if (pointer.leftButton.isUp) {
+			me.leftUp = true;
+			if (me.leftDown) {
 				me.leftReleased = true;
 			} else {
 				me.leftReleased = false;
 			}
+			me.leftDown = false;
 			me.leftPressed = false;
 		}
 
@@ -135,13 +143,25 @@ Main.prototype = {
 			me.arrow.alpha = 0;
 		}
 
-		if (me.spaceKey.justUp || me.leftReleased) {
+		if (me.spaceKey.justUp) {
 			if (me.canShoot) {
 				me.fire();
 			}
 			else {
 				me.cutRope();
 			}
+		}
+
+		if (me.leftPressed) {
+			if (me.canShoot) {
+				me.fire();
+			}
+			else {
+				me.cutRope();
+			}
+		}
+		if (me.rightReleased && me.player.swinging) {
+			me.cutRope()
 		}
 
 		if ((me.cursors.up.justUp || pointer.rightButton.isDown) && me.player.swinging) {
