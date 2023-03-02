@@ -7,6 +7,10 @@ Main.prototype = {
 	create: function() {
 	    var me = this;
 
+		game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
+
+		game.input.mouse.capture = true;
+
 		var level = levels[this.game.state.level];
 		//console.log('Creating level ', this.game.state.level);
 
@@ -49,6 +53,9 @@ Main.prototype = {
 	    // arrow
     	me.arrow = game.add.sprite(me.player.x, me.player.y, 'arrow');
     	me.arrow.anchor.setTo(0.5, 1.2);
+	    // aim
+    	me.aim = game.add.sprite(me.player.x, me.player.y, 'arrow');
+    	me.aim.anchor.setTo(0.5, 1.6);
 
 	    // Create rope
 	    me.createRope();
@@ -73,9 +80,49 @@ Main.prototype = {
 	update: function() {
 	    var me = this;
 
+		// handle pointer
+		var pointer = this.input.activePointer;
+
+		if (pointer.leftButton.isDown) {
+			me.leftPressed = true;
+			me.leftReleased = false;
+		}
+		if (pointer.leftButton.isUp) {
+			if (me.leftPressed) {
+				me.leftReleased = true;
+			} else {
+				me.leftReleased = false;
+			}
+			me.leftPressed = false;
+		}
+
+		if (pointer.rightButton.isDown) {
+			me.rightPressed = true;
+			me.rightReleased = false;
+		}
+		if (pointer.rightButton.isUp) {
+			if (me.rightPressed) {
+				me.rightReleased = true;
+			} else {
+				me.rightReleased = false;
+			}
+			me.rightPressed = false;
+		}
+
+		
+
 	    // let arrow follow player
    		me.arrow.x = me.player.x;
     	me.arrow.y = me.player.y;
+	    
+		// let aim follow player
+		me.aim.x = me.player.x;
+    	me.aim.y = me.player.y;
+		//aim direction
+		var dx = pointer.worldX - me.player.x;
+		var dy = pointer.worldY - me.player.y;
+		me.d = Math.sqrt(dx*dx+dy*dy);
+		me.aim.rotation = (Math.PI/2 - Math.acos(dx/me.d)); // * (dy > 0 ? 1 : -1);
 
 		me.standing = me.playerStanding();
 		me.extraWeb = false;
@@ -88,7 +135,7 @@ Main.prototype = {
 			me.arrow.alpha = 0;
 		}
 
-		if (me.spaceKey.justUp) {
+		if (me.spaceKey.justUp || me.leftReleased) {
 			if (me.canShoot) {
 				me.fire();
 			}
@@ -97,7 +144,7 @@ Main.prototype = {
 			}
 		}
 
-		if (me.cursors.up.justUp && me.player.swinging) {
+		if ((me.cursors.up.justUp || pointer.rightButton.isDown) && me.player.swinging) {
 			me.pullRope();
 		}
 
@@ -239,7 +286,7 @@ Main.prototype = {
 		//var len = me.rope.data.restLength;
 		var len = Phaser.Point.distance(me.player, { x: me.ropeAnchorX, y: me.ropeAnchorY }, false);
 		// console.log('Rope had length', len);
-		var step = 30;
+		var step = 20;
 		var newLen = Math.max(len-step, 3);
 		// console.log('Pulled to rope with length', newLen);
 		// console.log('Rope now has length', me.rope.data.restLength);
@@ -280,10 +327,11 @@ Main.prototype = {
 		me.web.body.createGroupCallback(me.killCollisionGroup, me.webFlopped, me);
 		me.web.body.createGroupCallback(me.nonstickCollisionGroup, me.webFlopped, me);
 
-		var magnitude = 900;
-		var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
-		me.web.body.velocity.x = magnitude * Math.cos(firingAngle) + me.player.body.velocity.x;
-		me.web.body.velocity.y = magnitude * Math.sin(firingAngle) + me.player.body.velocity.y;
+		var magnitude = (Math.sqrt(me.d) * 50) + 200;
+		// var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
+		var firingAngle = (me.aim.angle - 90) * Math.PI / 180;
+		me.web.body.velocity.x = magnitude * Math.cos(firingAngle); // + me.player.body.velocity.x;
+		me.web.body.velocity.y = magnitude * Math.sin(firingAngle); // + me.player.body.velocity.y;
 		if (!me.standing) {
 			me.player.body.velocity.x -= 0.1 * magnitude * Math.cos(firingAngle);
 			me.player.body.velocity.y -= 0.1 * magnitude * Math.sin(firingAngle);
@@ -343,7 +391,7 @@ Main.prototype = {
 
 	playerHit: function() {
 		console.log('We died!');
-		this.game.state.lives -= 1;
+		// this.game.state.lives -= 1;
 		console.log('lives: ', this.game.state.lives);
 		if (this.game.state.lives > 0) {
 			this.game.state.start("Main");

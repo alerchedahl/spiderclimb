@@ -18,10 +18,32 @@ var web;
 var webLine;
 var line;
 var gfx;
+var pointerArrow;
+var text1;
+var text2;
         
 var playerRadius = 10;
 
 function create() {
+
+    //register mouse input
+    text1 = this.add.text(10, 10, '', { fill: '#00ff00' });
+    text2 = this.add.text(500, 10, '', { fill: '#00ff00' });
+
+    this.input.mouse.disableContextMenu();
+
+    this.input.on('pointerup', function (pointer) {
+
+        if (pointer.leftButtonReleased())
+        {
+            console.log('dfdf')
+            text2.setText('Left Button was released');
+        }
+        else if (pointer.rightButtonReleased())
+        {
+            text2.setText('Right Button was released');
+        }
+    });
 
     // register keys
     spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -59,6 +81,10 @@ function create() {
     // arrow
     arrow = game.add.sprite(player.x, player.y, 'arrow');
     arrow.anchor.setTo(0.5, 1.2);
+    
+    // pointer
+    pointerArrow = game.add.sprite(player.x, player.y, 'arrow');
+    pointerArrow.anchor.setTo(0.4, 1.2);
 
     // controls
     cursors = game.input.keyboard.createCursorKeys();
@@ -70,6 +96,15 @@ function create() {
 
 function update() {
 
+    // handle pointer
+    var pointer = this.input.activePointer;
+    console.log(pointer);
+    text1.setText([
+        'x: ' + pointer.worldX,
+        'y: ' + pointer.worldY,
+        'isDown: ' + pointer.isDown
+    ]);
+    
     // collide the player and the platforms
     var playerHitPlatform = game.physics.arcade.collide(player, platforms);
     // collide the web projectile and the platforms
