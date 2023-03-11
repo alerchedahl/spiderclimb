@@ -138,10 +138,11 @@ Main.prototype = {
 		me.canShoot = !me.player.swinging || me.extraWeb;
 
 		if (me.canShoot) {
-			me.arrow.alpha = 1;
+			me.aim.alpha = 1;
 		} else {
-			me.arrow.alpha = 0;
+			me.aim.alpha = 0;
 		}
+		me.arrow.alpha = 0;
 
 		if (me.spaceKey.justUp) {
 			if (me.canShoot) {
@@ -156,8 +157,15 @@ Main.prototype = {
 			if (me.canShoot) {
 				me.fire();
 			}
-			else {
+		}
+		if (me.leftReleased) {
+			if (me.player.swinging) {
 				me.cutRope();
+			}
+		}
+		if (me.leftDown) {
+			if (me.player.swinging) {
+				me.pullRope();
 			}
 		}
 		if (me.rightReleased && me.player.swinging) {
@@ -306,7 +314,7 @@ Main.prototype = {
 		//var len = me.rope.data.restLength;
 		var len = Phaser.Point.distance(me.player, { x: me.ropeAnchorX, y: me.ropeAnchorY }, false);
 		// console.log('Rope had length', len);
-		var step = 20;
+		var step = Math.min(len*len*0.0001+18, 40);
 		var newLen = Math.max(len-step, 3);
 		// console.log('Pulled to rope with length', newLen);
 		// console.log('Rope now has length', me.rope.data.restLength);
@@ -347,7 +355,7 @@ Main.prototype = {
 		me.web.body.createGroupCallback(me.killCollisionGroup, me.webFlopped, me);
 		me.web.body.createGroupCallback(me.nonstickCollisionGroup, me.webFlopped, me);
 
-		var magnitude = (Math.sqrt(me.d) * 50) + 200;
+		var magnitude = 1200; //(Math.sqrt(me.d) * 50) + 200;
 		// var firingAngle = (me.arrow.angle - 90) * Math.PI / 180;
 		var firingAngle = (me.aim.angle - 90) * Math.PI / 180;
 		me.web.body.velocity.x = magnitude * Math.cos(firingAngle); // + me.player.body.velocity.x;
@@ -364,7 +372,11 @@ Main.prototype = {
 		// console.log('web hit', web.x, web.y);
 		me.newRope(block, me.web);
 		// remove the projectile - the rope remains
-		me.web.body.removeNextStep = true;
+		if (me.web.body) {
+			me.web.body.removeNextStep = true;
+		} else {
+			console.log('failed to call removenextstep');
+		}
 		me.web.destroy();
 	},
 
